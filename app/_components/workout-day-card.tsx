@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Calendar, Timer, Dumbbell } from "lucide-react";
 import type { GetHomeData200TodayWorkoutDay } from "@/app/_lib/api/fetch-generated";
 
@@ -22,7 +23,10 @@ export function WorkoutDayCard({ day }: WorkoutDayCardProps) {
   const coverUrl = day.coverImageUrl ?? "/home-banner.jpg";
 
   return (
-    <div className="relative flex h-[200px] w-full flex-col items-start justify-between overflow-hidden rounded-xl p-5">
+    <Link
+      href={`/workout-plans/${day.workoutPlanId}/days/${day.id}`}
+      className="relative flex h-[200px] w-full flex-col items-start justify-between overflow-hidden rounded-xl p-5"
+    >
       <Image
         src={coverUrl}
         alt={day.name}
@@ -59,6 +63,6 @@ export function WorkoutDayCard({ day }: WorkoutDayCardProps) {
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
