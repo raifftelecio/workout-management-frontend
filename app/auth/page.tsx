@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { authClient } from "@/app/_lib/auth-client";
 import { Button } from "@/components/ui/button";
 
@@ -11,8 +11,13 @@ const AuthPage = () => {
   const { data } = authClient.useSession();
   const [bgImageError, setBgImageError] = useState(false);
 
+  useEffect(() => {
+    if (data?.user) {
+      router.replace("/");
+    }
+  }, [data?.user, router]);
+
   if (data?.user) {
-    router.replace("/");
     return null;
   }
 
