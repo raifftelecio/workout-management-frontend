@@ -3,6 +3,7 @@ import Image from "next/image";
 import { authClient } from "@/app/_lib/auth-client";
 import { getUserTrainData } from "@/app/_lib/api/fetch-generated";
 import { headers } from "next/headers";
+import { requireOnboardingCheck } from "@/app/_lib/onboarding";
 import { NavBar } from "@/app/_components/nav-bar";
 import { ProfileLogoutButton } from "@/app/_components/profile-logout-button";
 import {
@@ -20,6 +21,8 @@ export default async function ProfilePage() {
   });
 
   if (!session.data?.user) redirect("/auth");
+
+  await requireOnboardingCheck(await headers());
 
   const trainDataResponse = await getUserTrainData({
     headers: await headers(),

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { authClient } from "@/app/_lib/auth-client";
 import { headers } from "next/headers";
+import { requireOnboardingCheck } from "@/app/_lib/onboarding";
 import { WorkoutDayPageClient } from "@/app/_components/workout-day-page-client";
 
 export default async function WorkoutDayPage({
@@ -15,6 +16,8 @@ export default async function WorkoutDayPage({
   });
 
   if (!session.data?.user) redirect("/auth");
+
+  await requireOnboardingCheck(await headers());
 
   const { dayId: workoutDayId } = await params;
 

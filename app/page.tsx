@@ -6,6 +6,7 @@ import { authClient } from "@/app/_lib/auth-client";
 import { getHomeData } from "@/app/_lib/api/fetch-generated";
 import type { GetHomeData200ConsistencyByDay } from "@/app/_lib/api/fetch-generated";
 import { headers } from "next/headers";
+import { requireOnboardingCheck } from "@/app/_lib/onboarding";
 import { NavBar } from "@/app/_components/nav-bar";
 import { WorkoutDayCard } from "@/app/_components/workout-day-card";
 import { ConsistencyTracker } from "@/app/_components/consistency-tracker";
@@ -19,6 +20,8 @@ export default async function Home() {
   });
 
   if (!session.data?.user) redirect("/auth");
+
+  await requireOnboardingCheck(await headers());
 
   const response = await getHomeData(dayjs().format("YYYY-MM-DD"));
   if (response.status === 401) redirect("/auth");

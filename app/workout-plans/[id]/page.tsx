@@ -5,6 +5,7 @@ import { authClient } from "@/app/_lib/auth-client";
 import { getWorkoutPlan } from "@/app/_lib/api/fetch-generated";
 import type { GetWorkoutPlan200WorkoutDaysItemWeekDay } from "@/app/_lib/api/fetch-generated";
 import { headers } from "next/headers";
+import { requireOnboardingCheck } from "@/app/_lib/onboarding";
 import { NavBar } from "@/app/_components/nav-bar";
 import { WorkoutPlanDayCard } from "@/app/_components/workout-plan-day-card";
 
@@ -30,6 +31,8 @@ export default async function WorkoutPlanPage({
   });
 
   if (!session.data?.user) redirect("/auth");
+
+  await requireOnboardingCheck(await headers());
 
   const { id: workoutPlanId } = await params;
   const response = await getWorkoutPlan(workoutPlanId);

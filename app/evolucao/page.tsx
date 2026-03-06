@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import { authClient } from "@/app/_lib/auth-client";
 import { getStats } from "@/app/_lib/api/fetch-generated";
 import { headers } from "next/headers";
+import { requireOnboardingCheck } from "@/app/_lib/onboarding";
 import { NavBar } from "@/app/_components/nav-bar";
 import { EvolutionStreakBanner } from "@/app/_components/evolution-streak-banner";
 import { EvolutionConsistencyHeatmap } from "@/app/_components/evolution-consistency-heatmap";
@@ -22,6 +23,8 @@ export default async function EvolucaoPage() {
   });
 
   if (!session.data?.user) redirect("/auth");
+
+  await requireOnboardingCheck(await headers());
 
   const from = dayjs().subtract(2, "month").startOf("month").format("YYYY-MM-DD");
   const to = dayjs().endOf("month").format("YYYY-MM-DD");
