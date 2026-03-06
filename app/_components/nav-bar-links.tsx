@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useQueryState, parseAsBoolean } from "nuqs";
 import {
   Calendar,
   ChartNoAxesColumn,
@@ -16,10 +17,18 @@ export interface NavBarLinksProps {
 
 export function NavBarLinks({ todayWorkoutLink }: NavBarLinksProps) {
   const pathname = usePathname();
+  const [, setChatOpen] = useQueryState("chat_open", parseAsBoolean);
+  const [, setChatInitialMessage] = useQueryState("chat_initial_message");
   const isOnWorkoutDayPage = pathname.includes("/workout-plans/") && pathname.includes("/days/");
   const calendarHref = todayWorkoutLink ?? "/";
   const calendarActive = isOnWorkoutDayPage;
   const statsActive = pathname === "/evolucao";
+  const profileActive = pathname === "/profile";
+
+  const openChat = () => {
+    setChatOpen(true);
+    setChatInitialMessage(null);
+  };
 
   return (
     <>
@@ -40,7 +49,8 @@ export function NavBarLinks({ todayWorkoutLink }: NavBarLinksProps) {
       <button
         type="button"
         className="flex items-center justify-center rounded-full bg-primary p-4 text-primary-foreground"
-        aria-label="Treinos"
+        aria-label="Abrir Coach AI"
+        onClick={openChat}
       >
         <Sparkles className="size-6" />
       </button>
@@ -51,13 +61,13 @@ export function NavBarLinks({ todayWorkoutLink }: NavBarLinksProps) {
       >
         <ChartNoAxesColumn className="size-6" />
       </Link>
-      <button
-        type="button"
-        className="flex items-center justify-center p-3 text-foreground"
+      <Link
+        href="/profile"
+        className={`flex items-center justify-center p-3 ${profileActive ? "text-primary" : "text-foreground hover:text-primary"}`}
         aria-label="Perfil"
       >
         <UserRound className="size-6" />
-      </button>
+      </Link>
     </>
   );
 }

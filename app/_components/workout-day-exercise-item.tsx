@@ -1,4 +1,7 @@
+"use client";
+
 import { CircleHelp, Zap } from "lucide-react";
+import { useQueryState, parseAsBoolean } from "nuqs";
 import type { GetWorkoutDay200ExercisesItem } from "@/app/_lib/api/fetch-generated";
 import { Button } from "@/components/ui/button";
 
@@ -7,7 +10,16 @@ export interface WorkoutDayExerciseItemProps {
 }
 
 export function WorkoutDayExerciseItem({ exercise }: WorkoutDayExerciseItemProps) {
+  const [, setChatOpen] = useQueryState("chat_open", parseAsBoolean);
+  const [, setChatInitialMessage] = useQueryState("chat_initial_message");
   const restLabel = `${exercise.restTimeInSeconds}S`;
+
+  const openExerciseHelp = () => {
+    setChatInitialMessage(
+      `Como executar o exercício ${exercise.name} corretamente?`
+    );
+    setChatOpen(true);
+  };
 
   return (
     <div className="flex h-[96px] items-start justify-between rounded-xl border border-border p-5">
@@ -22,6 +34,7 @@ export function WorkoutDayExerciseItem({ exercise }: WorkoutDayExerciseItemProps
             size="icon"
             className="size-5 shrink-0 p-0"
             aria-label="Ajuda"
+            onClick={openExerciseHelp}
           >
             <CircleHelp className="size-5 text-foreground" />
           </Button>
