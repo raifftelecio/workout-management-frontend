@@ -37,6 +37,8 @@
   --color-login-hero-bg: var(--login-hero-bg);
   --color-consistency-started: var(--consistency-started);
   --color-streak-bg: var(--streak-bg);
+  --color-evolution-banner-streak-zero: var(--evolution-banner-streak-zero);
+  --color-evolution-banner-streak-active: var(--evolution-banner-streak-active);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -55,6 +57,8 @@
   --login-hero-bg: oklch(0 0 0);
   --consistency-started: oklch(0.88 0.06 264);
   --streak-bg: oklch(0.95 0.08 45 / 0.2);
+  --evolution-banner-streak-zero: oklch(0.35 0.02 260);
+  --evolution-banner-streak-active: oklch(0.55 0.18 25);
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
   --card: oklch(1 0 0);
@@ -92,6 +96,8 @@
   --login-hero-bg: oklch(0.141 0.005 285.823);
   --consistency-started: oklch(0.35 0.08 264);
   --streak-bg: oklch(0.25 0.06 45 / 0.3);
+  --evolution-banner-streak-zero: oklch(0.25 0.02 260);
+  --evolution-banner-streak-active: oklch(0.45 0.15 25);
   --background: oklch(0.141 0.005 285.823);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.21 0.006 285.885);

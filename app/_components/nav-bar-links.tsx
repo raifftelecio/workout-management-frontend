@@ -19,6 +19,7 @@ export function NavBarLinks({ todayWorkoutLink }: NavBarLinksProps) {
   const isOnWorkoutDayPage = pathname.includes("/workout-plans/") && pathname.includes("/days/");
   const calendarHref = todayWorkoutLink ?? "/";
   const calendarActive = isOnWorkoutDayPage;
+  const statsActive = pathname === "/evolucao";
 
   return (
     <>
@@ -43,13 +44,13 @@ export function NavBarLinks({ todayWorkoutLink }: NavBarLinksProps) {
       >
         <Sparkles className="size-6" />
       </button>
-      <button
-        type="button"
-        className="flex items-center justify-center p-3 text-foreground"
+      <Link
+        href="/evolucao"
+        className={`flex items-center justify-center p-3 ${statsActive ? "text-primary" : "text-foreground hover:text-primary"}`}
         aria-label="Estatísticas"
       >
         <ChartNoAxesColumn className="size-6" />
-      </button>
+      </Link>
       <button
         type="button"
         className="flex items-center justify-center p-3 text-foreground"

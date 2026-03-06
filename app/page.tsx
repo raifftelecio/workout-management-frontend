@@ -83,12 +83,12 @@ export default async function Home() {
           <h2 className="text-lg font-semibold text-foreground">
             Consistência
           </h2>
-          <button
-            type="button"
-            className="text-xs text-primary"
+          <Link
+            href="/evolucao"
+            className="text-xs text-primary hover:underline"
           >
             Ver histórico
-          </button>
+          </Link>
         </div>
         <ConsistencyTracker
           consistencyByDay={homeData.consistencyByDay}
