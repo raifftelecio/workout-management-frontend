@@ -1,16 +1,14 @@
 import { redirect } from "next/navigation";
+import { authClient } from "@/app/_lib/auth-client";
+import { headers } from "next/headers";
+import { getHomeData, getUserTrainData } from "./_lib/api/fetch-generated";
+import dayjs from "dayjs";
 import Image from "next/image";
 import Link from "next/link";
-import dayjs from "dayjs";
-import { authClient } from "@/app/_lib/auth-client";
-import { getHomeData } from "@/app/_lib/api/fetch-generated";
-import type { GetHomeData200ConsistencyByDay } from "@/app/_lib/api/fetch-generated";
-import { headers } from "next/headers";
-import { requireOnboardingCheck } from "@/app/_lib/onboarding";
-import { NavBar } from "@/app/_components/nav-bar";
-import { WorkoutDayCard } from "@/app/_components/workout-day-card";
-import { ConsistencyTracker } from "@/app/_components/consistency-tracker";
-import { Button } from "@/components/ui/button";
+import { Flame } from "lucide-react";
+import { BottomNav } from "./_components/bottom-nav";
+import { ConsistencyTracker } from "./_components/consistency-tracker";
+import { WorkoutDayCard } from "./_components/workout-day-card";
 
 export default async function Home() {
   const session = await authClient.getSession({
@@ -21,33 +19,31 @@ export default async function Home() {
 
   if (!session.data?.user) redirect("/auth");
 
-  await requireOnboardingCheck(await headers());
+  const today = dayjs();
+  const [homeData, trainData] = await Promise.all([
+    getHomeData(today.format("YYYY-MM-DD")),
+    getUserTrainData(),
+  ]);
 
-  const response = await getHomeData(dayjs().format("YYYY-MM-DD"));
-  if (response.status === 401) redirect("/auth");
+  if (homeData.status !== 200) {
+    throw new Error("Failed to fetch home data");
+  }
 
-  const homeData =
-    response.status === 200
-      ? response.data
-      : {
-          todayWorkoutDay: undefined,
-          workoutStreak: 0,
-          consistencyByDay: {} as GetHomeData200ConsistencyByDay,
-        };
+  const needsOnboarding =
+    !homeData.data.activeWorkoutPlanId ||
+    (trainData.status === 200 && !trainData.data);
+  if (needsOnboarding) redirect("/onboarding");
 
-  const todayIndex = (dayjs().day() + 6) % 7;
-  const userName =
-    session.data.user.name ??
-    (session.data.user.email?.split("@")[0]) ??
-    "Usuário";
+  const { todayWorkoutDay, workoutStreak, consistencyByDay } = homeData.data;
+  const userName = session.data.user.name?.split(" ")[0] ?? "";
 
   return (
     <div className="flex min-h-svh flex-col bg-background pb-24">
-      <header className="relative flex h-[296px] shrink-0 flex-col items-start justify-between overflow-hidden rounded-b-[20px] px-5 pb-10 pt-5">
+      <div className="relative flex h-[296px] shrink-0 flex-col items-start justify-between overflow-hidden rounded-b-[20px] px-5 pb-10 pt-5">
         <div className="absolute inset-0" aria-hidden="true">
           <Image
-            alt=""
             src="/home-banner.jpg"
+            alt=""
             fill
             className="object-cover"
             priority
@@ -55,73 +51,90 @@ export default async function Home() {
           <div
             className="absolute inset-0"
             style={{
-              background:
+              backgroundImage:
                 "linear-gradient(243deg, rgba(0,0,0,0) 34%, rgb(0,0,0) 100%)",
             }}
           />
         </div>
-        <p className="relative text-[22px] font-normal uppercase leading-[1.15] text-primary-foreground tracking-wide">
+
+        <p
+          className="relative text-[22px] uppercase leading-[1.15] text-background"
+          style={{ fontFamily: "var(--font-anton)" }}
+        >
           Fit.ai
         </p>
-        <div className="relative flex items-end justify-between w-full">
+
+        <div className="relative flex w-full items-end justify-between">
           <div className="flex flex-col gap-1.5">
-            <p className="text-2xl font-semibold leading-tight text-primary-foreground">
+            <h1 className="font-heading text-2xl font-semibold leading-[1.05] text-background">
               Olá, {userName}
-            </p>
-            <p className="text-sm leading-[1.15] text-primary-foreground/70">
+            </h1>
+            <p className="font-heading text-sm leading-[1.15] text-background/70">
               Bora treinar hoje?
             </p>
           </div>
-          <Button
-            asChild
-            className="rounded-full px-4 py-2 h-auto text-sm font-semibold text-primary-foreground bg-primary hover:bg-primary/90"
-          >
-            <Link href="/">Bora!</Link>
-          </Button>
+          <div className="rounded-full bg-primary px-4 py-2">
+            <span className="font-heading text-sm font-semibold text-primary-foreground">
+              Bora!
+            </span>
+          </div>
         </div>
-      </header>
+      </div>
 
-      <section className="flex flex-col gap-3 pt-5 px-5 w-full">
-        <div className="flex items-center justify-between w-full leading-normal">
-          <h2 className="text-lg font-semibold text-foreground">
+      <div className="flex flex-col gap-3 px-5 pt-5">
+        <div className="flex items-center justify-between">
+          <h2 className="font-heading text-lg font-semibold text-foreground">
             Consistência
           </h2>
-          <Link
-            href="/evolucao"
-            className="text-xs text-primary hover:underline"
-          >
+          <button className="font-heading text-xs text-primary">
             Ver histórico
-          </Link>
-        </div>
-        <ConsistencyTracker
-          consistencyByDay={homeData.consistencyByDay}
-          todayIndex={todayIndex}
-          workoutStreak={homeData.workoutStreak}
-        />
-      </section>
-
-      <section className="flex flex-col gap-3 p-5 w-full max-w-[390px]">
-        <div className="flex items-center justify-between w-full leading-normal">
-          <h2 className="text-lg font-semibold text-foreground">
-            Treino de Hoje
-          </h2>
-          <button
-            type="button"
-            className="text-xs text-primary"
-          >
-            Ver treinos
           </button>
         </div>
-        {homeData.todayWorkoutDay ? (
-          <WorkoutDayCard day={homeData.todayWorkoutDay} />
-        ) : (
-          <div className="flex flex-col items-center justify-center h-[200px] rounded-xl border border-border bg-muted/30 text-muted-foreground text-sm">
-            Nenhum treino para hoje
-          </div>
-        )}
-      </section>
 
-      <NavBar />
+        <div className="flex items-center gap-3">
+          <div className="flex-1 rounded-xl border border-border p-5">
+            <ConsistencyTracker
+              consistencyByDay={consistencyByDay}
+              today={today}
+            />
+          </div>
+          <div className="flex items-center gap-2 self-stretch rounded-xl bg-streak px-5 py-2">
+            <Flame className="size-5 text-streak-foreground" />
+            <span className="font-heading text-base font-semibold text-foreground">
+              {workoutStreak}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {todayWorkoutDay && (
+        <div className="flex flex-col gap-3 p-5">
+          <div className="flex items-center justify-between">
+            <h2 className="font-heading text-lg font-semibold text-foreground">
+              Treino de Hoje
+            </h2>
+            <button className="font-heading text-xs text-primary">
+              Ver treinos
+            </button>
+          </div>
+
+          <Link
+            href={`/workout-plans/${todayWorkoutDay.workoutPlanId}/days/${todayWorkoutDay.id}`}
+          >
+            <WorkoutDayCard
+              name={todayWorkoutDay.name}
+              weekDay={todayWorkoutDay.weekDay}
+              estimatedDurationInSeconds={
+                todayWorkoutDay.estimatedDurationInSeconds
+              }
+              exercisesCount={todayWorkoutDay.exercisesCount}
+              coverImageUrl={todayWorkoutDay.coverImageUrl}
+            />
+          </Link>
+        </div>
+      )}
+
+      <BottomNav />
     </div>
   );
 }

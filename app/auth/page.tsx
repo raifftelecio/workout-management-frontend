@@ -1,89 +1,49 @@
-"use client";
-
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { redirect } from "next/navigation";
 import { authClient } from "@/app/_lib/auth-client";
-import { Button } from "@/components/ui/button";
+import { headers } from "next/headers";
+import { SignInWithGoogle } from "./_components/sing-in-with-google";
 
-const AuthPage = () => {
-  const router = useRouter();
-  const { data } = authClient.useSession();
-  const [bgImageError, setBgImageError] = useState(false);
+export default async function AuthPage() {
+  const session = await authClient.getSession({
+    fetchOptions: {
+      headers: await headers(),
+    },
+  });
 
-  useEffect(() => {
-    if (data?.user) {
-      router.replace("/");
-    }
-  }, [data?.user, router]);
-
-  if (data?.user) {
-    return null;
-  }
-
-  const handleGoogleSignIn = () => {
-    authClient.signIn.social({
-      provider: "google",
-      callbackURL: `${process.env.NEXT_PUBLIC_BASE_URL}/`,
-    });
-  };
+  if (session.data?.user) redirect("/");
 
   return (
-    <div className="relative min-h-dvh w-full overflow-hidden">
-      <div aria-hidden className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-login-hero-bg" />
-        <div className="absolute inset-0 overflow-hidden">
-          {!bgImageError && (
-            <Image
-              alt=""
-              className="absolute left-[-115.84%] top-[-9.82%] h-full max-w-none w-[354.25%] object-cover"
-              src="/login-bg.png"
-              fill
-              sizes="354vw 100vh"
-              priority
-              onError={() => setBgImageError(true)}
-            />
-          )}
-        </div>
-      </div>
-      <div className="absolute left-1/2 top-[48px] h-[38px] w-[85px] -translate-x-1/2">
+    <div className="relative flex min-h-svh flex-col bg-black">
+      <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
         <Image
-          alt="FIT.AI"
-          className="object-contain"
-          src="/logo-fit-ai.svg"
-          width={85}
-          height={39}
+          src="/login-bg.png"
+          alt=""
+          fill
+          className="object-cover"
           priority
         />
       </div>
-      <div className="absolute bottom-0 left-1/2 w-full max-w-[402px] -translate-x-1/2 px-5 pb-10 pt-12">
-        <div className="flex flex-col gap-[60px] rounded-t-[20px] bg-primary px-5 pb-10 pt-12">
-          <div className="flex flex-col items-center gap-6">
-            <p className="text-center font-semibold text-[32px] leading-[1.05] text-primary-foreground">
-              O app que vai transformar a forma como você treina.
-            </p>
-            <Button
-              type="button"
-              onClick={handleGoogleSignIn}
-              className="h-[38px] gap-2 rounded-full bg-card px-6 py-3 text-card-foreground hover:bg-muted hover:text-muted-foreground"
-            >
-              <Image
-                alt=""
-                src="/google.svg"
-                width={16}
-                height={16}
-                className="shrink-0"
-              />
-              Fazer login com Google
-            </Button>
-          </div>
-          <p className="text-center text-xs leading-[1.4] text-primary-foreground/70">
-            ©2026 Copyright FIT.AI. Todos os direitos reservados
-          </p>
+
+      <div className="relative z-10 flex justify-center pt-12">
+        <Image src="/fit-ai-logo.svg" alt="FIT.AI" width={85} height={38} />
+      </div>
+
+      <div className="flex-1" />
+
+      <div className="relative z-10 flex flex-col items-center gap-15 rounded-t-[20px] bg-primary px-5 pb-10 pt-12">
+        <div className="flex w-full flex-col items-center gap-6">
+          <h1 className="w-full text-center font-heading text-[32px] font-semibold leading-[1.05] text-primary-foreground">
+            O app que vai transformar a forma como você treina.
+          </h1>
+
+          <SignInWithGoogle />
         </div>
+
+        <p className="font-heading text-xs leading-[1.4] text-primary-foreground/70">
+          ©2026 Copyright FIT.AI. Todos os direitos reservados
+        </p>
       </div>
     </div>
   );
-};
-
-export default AuthPage;
+}
